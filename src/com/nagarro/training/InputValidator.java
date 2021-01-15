@@ -1,15 +1,14 @@
 package com.nagarro.training;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
- * This is the InputValidator class used for validating the arguments passed 
- * by the user and throw the exceptions respective to the invalid argument
+ * InputValidator class validates the command line input from user.
  * @author manbhardwaj
  */
 
-import com.nagarro.training.exceptions.InvalidInput;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+
 import com.nagarro.training.models.ImportedItem;
 import com.nagarro.training.models.Item;
 import com.nagarro.training.models.ItemDetail;
@@ -17,39 +16,99 @@ import com.nagarro.training.models.ManufacturedItem;
 import com.nagarro.training.models.RawItem;
 
 public class InputValidator {
+	static Scanner scan = new Scanner(System.in);
 
-	private void validateTypeOption(ArrayList<String> args) {
-		String type = args.get(args.indexOf("-" + Strings.type) + 1);
-		switch (type) {
-		case "raw":
-		case "manufactured":
-		case "imported":
-			break;
-		default:
-			throw new InvalidInput("Invalid 'Item Type' specified !");
+	static String userWantToContinueInput() {
+		String choice = "";
+		while (true) {
+			System.out.print("---> Do you want to enter details of any other item (y/n): ");
+			try {
+				choice = scan.nextLine();
+				if (!choice.matches("y|Y|Yes|yes|n|N|No|no") || choice == null || choice.isEmpty()) {
+					throw new Exception("Please input a valid option.");
+				}
+				break;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		}
+		return choice;
 	}
 
-	private void validateOptionHasCorrectDataType(ArrayList<String> args) {
-		try {
-			if (args.indexOf("-" + Strings.quantity) >= 0)
-				Integer.parseInt(args.get(args.indexOf("-" + Strings.quantity) + 1));
-			if (args.indexOf("-" + Strings.price) >= 0)
-				Double.parseDouble(args.get(args.indexOf("-" + Strings.price) + 1));
-		} catch (NumberFormatException e) {
-			throw new InvalidInput("Invalid input ! Make sure that item quantity and price are positive integer.");
+	static String quantityInput() {
+		String quantity;
+		while (true) {
+			System.out.println("Enter quantity of item : ");
+			try {
+				quantity = scan.nextLine();
+				if (!quantity.matches("[0-9]+") || Integer.parseInt(quantity) <= 0) {
+					throw new Exception("Quantity should be positive whole number value.");
+				}
+				break;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		}
+		return quantity;
 	}
 
-	private void validate(ArrayList<String> args) throws InvalidInput {
-		validateTypeOption(args);
-		validateOptionHasCorrectDataType(args);
+	static String priceInput() {
+		String price;
+		while (true) {
+			System.out.println("Enter price of item : ");
+			try {
+				price = scan.nextLine();
+				if (!price.matches("[0-9]+") || Double.parseDouble(price) <= 0)
+					throw new Exception("Price should be positive integer value.");
+				break;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return price;
 	}
 
-	ItemDetail getItemDetail(String[] args) throws InvalidInput {
+	static String typeInput() {
+		String type = "";
+		while (true) {
+			System.out.println("Enter type of item [ raw , manufactured , imported ] : ");
+			try {
+				type = scan.nextLine().toLowerCase();
+				switch (type) {
+				case Strings.raw:
+				case Strings.manufactured:
+				case Strings.imported:
+					break;
+				default:
+					throw new Exception("Invalid 'Item Type' specified !");
+				}
+				break;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return type;
+	}
+
+	static String nameInput() {
+		String name = "";
+		while (true) {
+			System.out.println("Enter name of item : ");
+			name = scan.nextLine();
+			try {
+				if (name == null || name.isEmpty()) {
+					throw new Exception("Name field cannot be empty");
+				}
+				break;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return name;
+	}
+
+	ItemDetail getItemDetail(String[] args) {
 		ArrayList<String> argsList = new ArrayList<>(Arrays.asList(args));
-
-		validate(argsList);
 
 		String type = argsList.get(argsList.indexOf("-" + Strings.type) + 1);
 		String name = argsList.get(argsList.indexOf("-" + Strings.name) + 1);
